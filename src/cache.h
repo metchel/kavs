@@ -5,7 +5,9 @@
 
 HashTable* positioncache_init();
 void positioncache_put(char* key, long value);
-long positioncache_get(char* key);
+HashTableNode* positioncache_get(char* key);
 void positioncache_delete(char* key);
 
+void valuecache_init();
+void valuecache_put(char* key, char* value);
 #endif

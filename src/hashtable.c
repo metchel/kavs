@@ -33,28 +33,44 @@ void hashtable_put(HashTable* table, char* key, long value) {
     }
 
     if (match == 0) {
-      tmp->value = value;
+      tmp->position = value;
     } else {
       HashTableNode* node = (HashTableNode*)malloc(sizeof(HashTableNode));
       node->key = strdup(key);
-      node->value = value;
+      node->position = value;
       node->next = NULL;
       tmp->next = node;
     }
   } else {
     HashTableNode* node = (HashTableNode*)malloc(sizeof(HashTableNode));
     node->key = strdup(key);
-    node->value = value;
+    node->position = value;
     node->next = NULL;
     table->data[i] = node;
   }
 }
 
-long hashtable_get(HashTable* table, char* key) {
+void hashtable_store(HashTable* table, char* key, Datum* datum) {
+  unsigned int i = hashtable_hash(table, key) % table->capacity;
+
+  if (table->data[i] != NULL) {
+    HashTableNode* tmp = table->data[i];
+    int match = 0;
+    while (tmp->next != NULL && (match = strcmp(tmp->key, key)) != 0) {
+      tmp = tmp->next;
+    }
+
+    if (match == 0) {
+      tmp->datum = datum;
+    }
+  }
+}
+
+HashTableNode* hashtable_get(HashTable* table, char* key) {
   unsigned int i = hashtable_hash(table, key) % table->capacity;
 
   if (table->data[i] == NULL) {
-    return -1L;
+    return NULL;
   } 
 
   HashTableNode* tmp = table->data[i];
@@ -63,7 +79,7 @@ long hashtable_get(HashTable* table, char* key) {
     tmp = tmp->next;
   }
 
-  return match == 0 ? tmp->value : -1L;
+  return match == 0 ? tmp : NULL;
 }
 
 void hashtable_delete(HashTable* table, char* key) {
@@ -105,6 +121,6 @@ void hashtable_print(HashTable* table, char* format) {
     HashTableNode* tmp = table->data[i];
 
     if (tmp != NULL) 
-      printf(format, tmp->key, tmp->value);
+      printf(format, tmp->key, tmp->position);
   }
 }

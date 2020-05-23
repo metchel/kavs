@@ -6,6 +6,7 @@
 #include "cache.h"
 #include "logfile.h"
 #include "command.h"
+#include "hashtable.h"
 
 static char* NOT_FOUND = "NOT FOUND";
 
@@ -31,33 +32,48 @@ int command_exec(Command* command, Response* res) {
 }
 
 int command_get(Response* res, char* key) {
-  long position = positioncache_get(key);
+  if (key == NULL)
+    printf("Usage: get <key>");
 
-  res->errorCode = -1;
+  HashTableNode* node = positioncache_get(key);
+
   res->type = COMMAND_GET;
-  res->data = NOT_FOUND;
 
-  if (position < 0)
-    return -1;
+  if (node == NULL) {
+      res->errorCode = -1;
+      res->data = NOT_FOUND;
+      return -1;
+  }
 
-  char* line = logfile_seek(position);
+  char* result;
 
-  if (line == NULL) 
-    return -1;
+  if (node->datum != NULL && node->datum->contents != NULL) {
+    result = node->datum->contents;
+  } else {
+    printf("CACHE MISS...");
+    long position = node->position;
+    char* line = logfile_seek(position);
 
-  char* k = strtok(line, ",");
-  char* v = strtok(NULL, "\n");
+    if (line == NULL)
+      return -1;
 
-  if (v == NULL)
-    printf("Cache miss...");
+    char* k = strtok(line, ",");
+    char* v = strtok(NULL, "\n");
+
+    result = v;
+
+    valuecache_put(k, v);
+  }
 
   res->errorCode = 1;
-  res->data = strdup(v);
+  res->data = result;
 
   return res->errorCode;
 }
 
 int command_put(Response* res, char* key, char* value) {
+  if (key == NULL || value == NULL)
+    printf("Usage: put <key> <value>");
   
   long position, offset;
   position = logfile_append(key);
@@ -67,6 +83,7 @@ int command_put(Response* res, char* key, char* value) {
 
   if (position >= 0) {
     positioncache_put(key, position);
+    valuecache_put(key, value);
   }
 
   res->errorCode = 1;
@@ -77,6 +94,8 @@ int command_put(Response* res, char* key, char* value) {
 }
 
 int command_delete(Response* res, char* key) {
+  if (key == NULL)
+    printf("Usage: delete <key>");
   
   long position;
   position = logfile_append(key);

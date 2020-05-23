@@ -25,6 +25,7 @@ int parse(Command *cmd, char* buffer) {
   char* commandString = strtok(buffer, " ");
 
   switch(*commandString) {
+    // There is a bug here for something like "get "
     case 'g':
       if (strcmp(commandString, "get") == 0) {
         type = COMMAND_GET;
@@ -64,7 +65,10 @@ int main(int argc, const char* argv[]) {
   char buffer[MAX_BUFFER_SIZE];
 
   logfile_init("kavs.log");
+
   HashTable* positions = positioncache_init();
+  valuecache_init();
+
   logfile_compact(positions);
 
   Command command;

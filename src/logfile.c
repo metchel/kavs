@@ -103,7 +103,8 @@ void logfile_compact(HashTable* positions) {
       continue;
     
     char* k = strtok(line, ",");
-    long actualPosition = hashtable_get(positions, k);
+    HashTableNode* node = hashtable_get(positions, k);
+    long actualPosition = node->position;
 
     if (actualPosition != position) {
       // this is an old value.
