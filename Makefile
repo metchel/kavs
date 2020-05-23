@@ -1,0 +1,1 @@
+all: cd src && make
