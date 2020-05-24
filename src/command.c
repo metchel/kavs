@@ -50,7 +50,6 @@ int command_get(Response* res, char* key) {
   if (node->datum != NULL && node->datum->contents != NULL) {
     result = node->datum->contents;
   } else {
-    printf("CACHE MISS...");
     long position = node->position;
     char* line = logfile_seek(position);
 
@@ -83,7 +82,7 @@ int command_put(Response* res, char* key, char* value) {
 
   if (position >= 0) {
     positioncache_put(key, position);
-    valuecache_put(key, value);
+    //valuecache_put(key, value);
   }
 
   res->errorCode = 1;

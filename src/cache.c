@@ -23,10 +23,13 @@ void positioncache_put(char* key, long position) {
 
 HashTableNode* positioncache_get(char* key) {
   HashTableNode* node = hashtable_get(&positions, key);
+
+  /**
   timestamp++;
   if (node->datum != NULL) {
     node->datum->timestamp = timestamp;
   }
+  **/
 
   return node;
 }
@@ -36,14 +39,18 @@ void positioncache_delete(char* key) {
 }
 
 void valuecache_init() {
+  /**
   LRU_init(&values);
+  **/
 }
 
 void valuecache_put(char* key, char* value) {
+  /**
   Datum* datum = (Datum*)malloc(sizeof(Datum));
   datum->timestamp = timestamp;
   datum->contents = strdup(value);
   LRU_insert(&values, datum);
 
   hashtable_store(&positions, key, datum);
+  **/
 }
